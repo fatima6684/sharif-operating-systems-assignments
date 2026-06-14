@@ -1,0 +1,39 @@
+int run_container(struct config cfg) {
+    pid_t pid;
+
+    if (unshare(CLONE_NEWPID | CLONE_NEWNS) != 0) {
+        perror("[ERR] unshare failed");
+        return 1;
+    }
+
+    if (mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL) != 0) {
+        perror("[ERR] mount / as private failed");
+        return 1;
+    }
+
+    pid = fork();
+    if (pid < 0) {
+        perror("[ERR] fork failed");
+        return 1;
+    }
+
+    if (pid == 0) {
+
+        printf("[Child] PID namespace started, PID=%d\n", getpid());
+
+     
+        if (mount("proc", "/proc", "proc", 0, NULL) != 0) {
+            perror("[ERR] mount /proc failed");
+            exit(1);
+        }
+
+        execl("/bin/sh", "sh", "-c", cfg.command, NULL);
+        perror("[ERR] execl failed");
+        exit(1);
+    } else {
+        waitpid(pid, NULL, 0);
+        printf("[Parent] Container stopped.\n");
+    }
+
+    return 0;
+}
