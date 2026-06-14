@@ -1,4 +1,4 @@
-# Homework 06 - Operating Systems
+# Homework 05 - Operating Systems
 
 This homework focuses on CPU scheduling algorithms, container isolation mechanisms, and file system space management.
 
